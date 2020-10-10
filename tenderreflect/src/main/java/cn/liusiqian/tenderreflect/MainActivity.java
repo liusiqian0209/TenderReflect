@@ -1,10 +1,20 @@
 package cn.liusiqian.tenderreflect;
 
-import androidx.appcompat.app.AppCompatActivity;
+import java.lang.reflect.Method;
+
+import android.app.Activity;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
+
+  private static final String TAG = "ReflectTag";
+
+  private TextView tvHello;
+  private TextView tvCallDirect;
 
   // Used to load the 'native-lib' library on application startup.
   static {
@@ -16,9 +26,34 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    // Example of a call to a native method
-    TextView tv = findViewById(R.id.sample_text);
-    tv.setText(stringFromJNI());
+    initWidgets();
+  }
+
+  private void initWidgets() {
+    tvHello = findViewById(R.id.txt_hello);
+    tvCallDirect = findViewById(R.id.txt_call_ref_direct);
+
+    tvHello.setText(stringFromJNI());
+    tvCallDirect.setOnClickListener(ocl);
+  }
+
+  private View.OnClickListener ocl = new View.OnClickListener() {
+    @Override
+    public void onClick(View view) {
+      if (view.getId() == R.id.txt_call_ref_direct) {
+        callReflectDirect();
+      }
+    }
+  };
+
+  private void callReflectDirect() {
+    try {
+      Method method = WifiManager.class.getDeclaredMethod("getChannel");
+      method.setAccessible(true);
+      logI("callReflectDirect success!");
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -26,4 +61,12 @@ public class MainActivity extends AppCompatActivity {
    * which is packaged with this application.
    */
   public native String stringFromJNI();
+
+  private void logI(String message) {
+    Log.i(TAG, message);
+  }
+
+  private void logE(String message) {
+    Log.e(TAG, message);
+  }
 }
