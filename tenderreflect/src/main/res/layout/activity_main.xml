@@ -23,5 +23,13 @@
     app:layout_constraintTop_toTopOf="parent"
     android:text="Call Reflect Direct"/>
 
+  <TextView
+    android:id="@+id/txt_change_hiddenapipolicy"
+    style="@style/ButtonTextStyle"
+    app:layout_constraintLeft_toRightOf="@id/txt_call_ref_direct"
+    app:layout_constraintTop_toTopOf="parent"
+    android:text="Change HiddenApiPolicy"/>
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

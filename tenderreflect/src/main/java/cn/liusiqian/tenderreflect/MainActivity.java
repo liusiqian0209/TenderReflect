@@ -14,7 +14,7 @@ public class MainActivity extends Activity {
   private static final String TAG = "ReflectTag";
 
   private TextView tvHello;
-  private TextView tvCallDirect;
+  private TextView tvCallDirect, tvChangeHiddenApiPolicy;
 
   // Used to load the 'native-lib' library on application startup.
   static {
@@ -32,9 +32,11 @@ public class MainActivity extends Activity {
   private void initWidgets() {
     tvHello = findViewById(R.id.txt_hello);
     tvCallDirect = findViewById(R.id.txt_call_ref_direct);
+    tvChangeHiddenApiPolicy = findViewById(R.id.txt_change_hiddenapipolicy);
 
     tvHello.setText(stringFromJNI());
     tvCallDirect.setOnClickListener(ocl);
+    tvChangeHiddenApiPolicy.setOnClickListener(ocl);
   }
 
   private View.OnClickListener ocl = new View.OnClickListener() {
@@ -42,6 +44,8 @@ public class MainActivity extends Activity {
     public void onClick(View view) {
       if (view.getId() == R.id.txt_call_ref_direct) {
         callReflectDirect();
+      } else if (view.getId() == R.id.txt_change_hiddenapipolicy) {
+        callChangeHiddenApiPolicyNative(getApplicationInfo().targetSdkVersion);
       }
     }
   };
@@ -61,6 +65,8 @@ public class MainActivity extends Activity {
    * which is packaged with this application.
    */
   public native String stringFromJNI();
+
+  public native void callChangeHiddenApiPolicyNative(int targetSdkVersion);
 
   private void logI(String message) {
     Log.i(TAG, message);
