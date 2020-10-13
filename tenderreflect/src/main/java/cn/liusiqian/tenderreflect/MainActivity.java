@@ -15,6 +15,7 @@ public class MainActivity extends Activity {
 
   private TextView tvHello;
   private TextView tvCallDirect, tvChangeHiddenApiPolicy, tvCallMetaRef;
+  private TextView tvSetHiddenApiExemptions;
 
   // Used to load the 'native-lib' library on application startup.
   static {
@@ -34,11 +35,13 @@ public class MainActivity extends Activity {
     tvCallDirect = findViewById(R.id.txt_call_ref_direct);
     tvChangeHiddenApiPolicy = findViewById(R.id.txt_change_hiddenapipolicy);
     tvCallMetaRef = findViewById(R.id.txt_call_meta_reflect);
+    tvSetHiddenApiExemptions = findViewById(R.id.txt_set_hidden_exemptions);
 
     tvHello.setText(stringFromJNI());
     tvCallDirect.setOnClickListener(ocl);
     tvChangeHiddenApiPolicy.setOnClickListener(ocl);
     tvCallMetaRef.setOnClickListener(ocl);
+    tvSetHiddenApiExemptions.setOnClickListener(ocl);
   }
 
   private View.OnClickListener ocl = new View.OnClickListener() {
@@ -50,9 +53,31 @@ public class MainActivity extends Activity {
         callChangeHiddenApiPolicyNative(getApplicationInfo().targetSdkVersion);
       } else if (view.getId() == R.id.txt_call_meta_reflect) {
         callMetaReflect();
+      } else if (view.getId() == R.id.txt_set_hidden_exemptions) {
+        setHiddenApiExemptions();
       }
     }
   };
+
+  private void setHiddenApiExemptions() {
+    String[] exemptionApiArray = {"L"};
+    Class cls = null;
+    try {
+      cls = Class.forName("dalvik.system.VMRuntime");
+      Method metaMethod = Class.class.getDeclaredMethod("getDeclaredMethod", String.class, Class[].class);
+
+      Method methodGetRuntime = (Method) metaMethod.invoke(cls,"getRuntime", null);
+      methodGetRuntime.setAccessible(true);
+      Object objRuntime = methodGetRuntime.invoke(null);
+
+      Method method = (Method) metaMethod.invoke(cls,"setHiddenApiExemptions", new Class[]{String[].class});
+      method.setAccessible(true);
+      method.invoke(objRuntime, new Object[]{exemptionApiArray});
+      logI("setHiddenApiExemptions success!");
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
 
   private void callMetaReflect() {
     try {
