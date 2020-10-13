@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 
 import android.app.Activity;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -15,7 +16,7 @@ public class MainActivity extends Activity {
 
   private TextView tvHello;
   private TextView tvCallDirect, tvChangeHiddenApiPolicy, tvCallMetaRef;
-  private TextView tvSetHiddenApiExemptions;
+  private TextView tvSetHiddenApiExemptions, tvSetHiddenApiExemptionsNative;
 
   // Used to load the 'native-lib' library on application startup.
   static {
@@ -36,12 +37,14 @@ public class MainActivity extends Activity {
     tvChangeHiddenApiPolicy = findViewById(R.id.txt_change_hiddenapipolicy);
     tvCallMetaRef = findViewById(R.id.txt_call_meta_reflect);
     tvSetHiddenApiExemptions = findViewById(R.id.txt_set_hidden_exemptions);
+    tvSetHiddenApiExemptionsNative = findViewById(R.id.txt_set_hidden_exemptions_native);
 
     tvHello.setText(stringFromJNI());
     tvCallDirect.setOnClickListener(ocl);
     tvChangeHiddenApiPolicy.setOnClickListener(ocl);
     tvCallMetaRef.setOnClickListener(ocl);
     tvSetHiddenApiExemptions.setOnClickListener(ocl);
+    tvSetHiddenApiExemptionsNative.setOnClickListener(ocl);
   }
 
   private View.OnClickListener ocl = new View.OnClickListener() {
@@ -55,6 +58,8 @@ public class MainActivity extends Activity {
         callMetaReflect();
       } else if (view.getId() == R.id.txt_set_hidden_exemptions) {
         setHiddenApiExemptions();
+      } else if (view.getId() == R.id.txt_set_hidden_exemptions_native) {
+        callChangeHiddenApiExemptionsNative(getApplicationInfo().targetSdkVersion, Build.VERSION.SDK_INT);
       }
     }
   };
@@ -64,13 +69,15 @@ public class MainActivity extends Activity {
     Class cls = null;
     try {
       cls = Class.forName("dalvik.system.VMRuntime");
-      Method metaMethod = Class.class.getDeclaredMethod("getDeclaredMethod", String.class, Class[].class);
+      Method metaMethod =
+          Class.class.getDeclaredMethod("getDeclaredMethod", String.class, Class[].class);
 
-      Method methodGetRuntime = (Method) metaMethod.invoke(cls,"getRuntime", null);
+      Method methodGetRuntime = (Method) metaMethod.invoke(cls, "getRuntime", null);
       methodGetRuntime.setAccessible(true);
       Object objRuntime = methodGetRuntime.invoke(null);
 
-      Method method = (Method) metaMethod.invoke(cls,"setHiddenApiExemptions", new Class[]{String[].class});
+      Method method =
+          (Method) metaMethod.invoke(cls, "setHiddenApiExemptions", new Class[]{String[].class});
       method.setAccessible(true);
       method.invoke(objRuntime, new Object[]{exemptionApiArray});
       logI("setHiddenApiExemptions success!");
@@ -81,7 +88,8 @@ public class MainActivity extends Activity {
 
   private void callMetaReflect() {
     try {
-      Method metaMethod = Class.class.getDeclaredMethod("getDeclaredMethod", String.class, Class[].class);
+      Method metaMethod =
+          Class.class.getDeclaredMethod("getDeclaredMethod", String.class, Class[].class);
       Method hiddenApiMethod = (Method) metaMethod.invoke(WifiManager.class, "getChannel", null);
       hiddenApiMethod.setAccessible(true);
       logI("callMetaReflect success!");
@@ -107,6 +115,8 @@ public class MainActivity extends Activity {
   public native String stringFromJNI();
 
   public native void callChangeHiddenApiPolicyNative(int targetSdkVersion);
+
+  public native void callChangeHiddenApiExemptionsNative(int targetSdkVersion, int osVersion);
 
   private void logI(String message) {
     Log.i(TAG, message);

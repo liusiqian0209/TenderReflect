@@ -17,3 +17,12 @@ Java_cn_liusiqian_tenderreflect_MainActivity_callChangeHiddenApiPolicyNative(
         jint target_sdk_version) {
     change_hidden_api_policy(env, target_sdk_version);
 }
+
+extern "C" JNIEXPORT void JNICALL
+Java_cn_liusiqian_tenderreflect_MainActivity_callChangeHiddenApiExemptionsNative(
+        JNIEnv* env,
+        jobject /* this */,
+        jint target_sdk_version,
+        jint os_version) {
+    change_hidden_api_exemptions(env, target_sdk_version, os_version);
+}
