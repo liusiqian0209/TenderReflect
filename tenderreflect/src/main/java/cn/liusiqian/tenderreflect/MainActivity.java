@@ -14,7 +14,7 @@ public class MainActivity extends Activity {
   private static final String TAG = "ReflectTag";
 
   private TextView tvHello;
-  private TextView tvCallDirect, tvChangeHiddenApiPolicy;
+  private TextView tvCallDirect, tvChangeHiddenApiPolicy, tvCallMetaRef;
 
   // Used to load the 'native-lib' library on application startup.
   static {
@@ -33,10 +33,12 @@ public class MainActivity extends Activity {
     tvHello = findViewById(R.id.txt_hello);
     tvCallDirect = findViewById(R.id.txt_call_ref_direct);
     tvChangeHiddenApiPolicy = findViewById(R.id.txt_change_hiddenapipolicy);
+    tvCallMetaRef = findViewById(R.id.txt_call_meta_reflect);
 
     tvHello.setText(stringFromJNI());
     tvCallDirect.setOnClickListener(ocl);
     tvChangeHiddenApiPolicy.setOnClickListener(ocl);
+    tvCallMetaRef.setOnClickListener(ocl);
   }
 
   private View.OnClickListener ocl = new View.OnClickListener() {
@@ -46,9 +48,22 @@ public class MainActivity extends Activity {
         callReflectDirect();
       } else if (view.getId() == R.id.txt_change_hiddenapipolicy) {
         callChangeHiddenApiPolicyNative(getApplicationInfo().targetSdkVersion);
+      } else if (view.getId() == R.id.txt_call_meta_reflect) {
+        callMetaReflect();
       }
     }
   };
+
+  private void callMetaReflect() {
+    try {
+      Method metaMethod = Class.class.getDeclaredMethod("getDeclaredMethod", String.class, Class[].class);
+      Method hiddenApiMethod = (Method) metaMethod.invoke(WifiManager.class, "getChannel", null);
+      hiddenApiMethod.setAccessible(true);
+      logI("callMetaReflect success!");
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
 
   private void callReflectDirect() {
     try {
